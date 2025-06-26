@@ -34,11 +34,15 @@ def get_embedding(screen, ui_model, screen_model, layout_model, num_predictors, 
     bert_size = 768
 
     loaded_ui_model = HiddenLabelPredictorModel(bert, bert_size, 16)
-    loaded_ui_model.load_state_dict(torch.load(ui_model), strict=False)
+    try:
+        loaded_ui_model.load_state_dict(torch.load(ui_model), strict=False)
+    except Exception as e:
+        loaded_ui_model.load_state_dict(torch.load(ui_model, map_location=torch.device('cpu')), strict=False)
 
     ui_class = torch.tensor([UI[1] for UI in labeled_text])
     ui_text = [UI[0] for UI in labeled_text]
     UI_embeddings = loaded_ui_model.model([ui_text, ui_class])
+
 
     #avg_embedding = UI_embeddings.sum(dim=0)/len(labeled_text)
 
@@ -52,7 +56,11 @@ def get_embedding(screen, ui_model, screen_model, layout_model, num_predictors, 
     descr_emb = torch.as_tensor(bert.encode([descr]), dtype=torch.float)
     
     layout_autoencoder = LayoutAutoEncoder()
-    layout_autoencoder.load_state_dict(torch.load(layout_model))
+    try:
+        layout_autoencoder.load_state_dict(torch.load(layout_model))
+    except Exception as e:
+        layout_autoencoder.load_state_dict(torch.load(layout_model, map_location=torch.device('cpu')))
+
     layout_embedder = layout_autoencoder.enc
     screen_to_add = ScreenLayout(args.screen)
     screen_pixels = screen_to_add.pixels.flatten()
@@ -77,7 +85,11 @@ def get_embedding(screen, ui_model, screen_model, layout_model, num_predictors, 
 
     screen_embedder = Screen2Vec(bert_size, adus, adss, net_version)
     loaded_screen_model = TracePredictor(screen_embedder, net_version)
-    loaded_screen_model.load_state_dict(torch.load(screen_model))
+    try:
+        loaded_screen_model.load_state_dict(torch.load(screen_model))
+    except Exception as e:
+        loaded_screen_model.load_state_dict(torch.load(screen_model, map_location=torch.device('cpu')))
+
 
 
     if net_version in [1,3,4,5]:
