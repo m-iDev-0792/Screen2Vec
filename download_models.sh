@@ -1,10 +1,30 @@
-#!/bin/sh
+#!/bin/bash
 
-wget http://basalt.amulet.cs.cmu.edu/screen2vec/Screen2Vec_model_v4.ep120
+# Create models directory if it doesn't exist
+mkdir -p models
 
-wget http://basalt.amulet.cs.cmu.edu/screen2vec/UI2Vec_model.ep120
+# Base URL for the files
+BASE_URL="http://basalt.amulet.cs.cmu.edu/screen2vec"
 
-wget http://basalt.amulet.cs.cmu.edu/screen2vec/layout_encoder.ep800
+# Array of filenames to download
+FILES=(
+    "visual_encoder.ep800"
+    "layout_encoder.ep800"
+    "UI2Vec_model.ep120"
+    "Screen2Vec_model_v4.ep120"
+)
 
-wget http://basalt.amulet.cs.cmu.edu/screen2vec/visual_encoder.ep800
+echo "Starting download of model files..."
 
+# Download each file
+for file in "${FILES[@]}"; do
+    echo "Downloading $file..."
+    if curl -L -o "models/$file" "$BASE_URL/$file"; then
+        echo "✓ Successfully downloaded $file"
+    else
+        echo "✗ Failed to download $file"
+        exit 1
+    fi
+done
+
+echo "All model files downloaded successfully to the 'models' directory!"
